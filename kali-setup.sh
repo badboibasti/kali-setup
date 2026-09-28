@@ -15,7 +15,6 @@ sudo apt install -y \
     seclists \
     netcat-openbsd \
     fastfetch \
-    git \
     curl \
     wget \
     vim \
