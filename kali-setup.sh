@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+export DEBIAN_FRONTEND=noninteractive
+
 echo "==> Updating package lists..."
 sudo apt update
 
