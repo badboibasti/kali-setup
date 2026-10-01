@@ -26,9 +26,7 @@ sudo apt install -y \
 
 # Web enumeration & testing
 sudo apt install -y \
-    ffuf \
-    burpsuite \
-    firefox-esr
+    ffuf 
 
 # Network & SMB
 sudo apt install -y \
