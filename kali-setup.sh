@@ -35,7 +35,22 @@ sudo apt install -y \
 
 # Exploitation
 sudo apt install -y \
-    metasploit-framework
+    metasploit-framework \
+    exploitdb
+
+echo "==> Updating Searchsploit Database..."
+searchsploit -u
+
+echo "==> Verifying Searchsploit..."
+if command -v searchsploit >/dev/null 2>&1; then
+    echo "    Searchsploit is installed."
+else
+    echo "    ERROR: Searchsploit installation failed."
+    exit 1
+fi
+
+# Updating Searchsploit Database
+searchsploit -u
 
 # Programming & scripting
 sudo apt install -y \
