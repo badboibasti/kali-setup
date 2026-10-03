@@ -15,6 +15,7 @@ echo "==> Installing packages..."
 # Remote access
 sudo apt install -y \
     openssh-server \
+    openvpn \
     xauth \
     zsh
 
@@ -27,7 +28,9 @@ sudo apt install -y \
 
 # Web enumeration & testing
 sudo apt install -y \
-    ffuf 
+    ffuf \
+    burpsuite \
+    firefox-esr 
 
 # Network & SMB
 sudo apt install -y \
