@@ -42,6 +42,10 @@ sudo apt install -y \
     metasploit-framework \
     exploitdb
 
+# Privilege Escalation
+sudo apt install -y \
+    peass
+
 echo "==> Updating Searchsploit Database..."
 searchsploit -u
 
