@@ -35,7 +35,11 @@ sudo apt install -y \
 # Network & SMB
 sudo apt install -y \
     netcat-openbsd \
-    smbclient
+    smbclient \
+    wireshark
+
+echo "==> Setting up Wireshark..."
+sudo usermod -aG wireshark "$USER"
 
 # Exploitation
 sudo apt install -y \
@@ -46,9 +50,6 @@ sudo apt install -y \
 sudo apt install -y \
     peass
 
-echo "==> Updating Searchsploit Database..."
-searchsploit -u
-
 echo "==> Verifying Searchsploit..."
 if command -v searchsploit >/dev/null 2>&1; then
     echo "    Searchsploit is installed."
@@ -57,7 +58,8 @@ else
     exit 1
 fi
 
-# Updating Searchsploit Database
+echo "==> Updating Searchsploit Database..."
+# Updating Seddarchsploit Database
 searchsploit -u
 
 # Programming & scripting
