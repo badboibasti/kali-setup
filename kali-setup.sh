@@ -36,7 +36,8 @@ sudo apt install -y \
 sudo apt install -y \
     netcat-openbsd \
     smbclient \
-    wireshark
+    wireshark \
+    responder
 
 echo "==> Setting up Wireshark..."
 sudo usermod -aG wireshark "$USER"
@@ -45,6 +46,10 @@ sudo usermod -aG wireshark "$USER"
 sudo apt install -y \
     metasploit-framework \
     exploitdb
+
+# Hash Cracking
+sudo apt install -y \
+    hashcat
 
 # Privilege Escalation
 sudo apt install -y \
