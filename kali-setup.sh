@@ -15,6 +15,7 @@ echo "==> Installing packages..."
 # Remote access
 sudo apt install -y \
     openssh-server \
+    freerdp3-x11 \
     openvpn \
     xauth \
     zsh
