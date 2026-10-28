@@ -18,6 +18,7 @@ sudo apt install -y \
     freerdp3-x11 \
     openvpn \
     xauth \
+    netexec \
     zsh
 
 # Reconnaissance & scanning
