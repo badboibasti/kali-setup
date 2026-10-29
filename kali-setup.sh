@@ -1,109 +1,180 @@
+
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -Eeuo pipefail
+
+# Run as a normal user with sudo privileges.
+if (( EUID == 0 )); then
+    echo "ERROR: Run this script as a normal user, not root." >&2
+    exit 1
+fi
+
+sudo -v
 
 export DEBIAN_FRONTEND=noninteractive
 
-echo "==> Updating package lists..."
-sudo apt update
+trap 'echo "ERROR: Command failed on line $LINENO: $BASH_COMMAND" >&2' ERR
 
-echo "==> Upgrading system..."
-sudo apt full-upgrade -y
+log() {
+    printf '\n==> %s\n' "$1"
+}
 
-echo "==> Installing packages..."
+# --------------------------------------------------
+# System update
+# --------------------------------------------------
 
-# Remote access
-sudo apt install -y \
-    openssh-server \
-    freerdp3-x11 \
-    openvpn \
-    xauth \
-    netexec \
+log "Updating Kali Linux..."
+
+sudo apt-get update
+sudo apt-get full-upgrade -y
+
+# --------------------------------------------------
+# Wireshark configuration
+# --------------------------------------------------
+
+log "Configuring Wireshark permissions..."
+
+echo "wireshark-common wireshark-common/install-setuid boolean true" |
+    sudo debconf-set-selections
+
+# --------------------------------------------------
+# Package installation
+# --------------------------------------------------
+
+log "Installing penetration testing tools..."
+
+PACKAGES=(
+    # Remote access
+    openssh-server
+    freerdp3-x11
+    openvpn
+    xauth
+    netexec
     zsh
 
-# Reconnaissance & scanning
-sudo apt install -y \
-    nmap \
-    seclists \
-    dnsutils \
+    # Reconnaissance and scanning
+    nmap
+    seclists
+    dnsutils
     whois
+    gowitness
 
-# Web enumeration & testing
-sudo apt install -y \
-    ffuf \
-    burpsuite \
-    firefox-esr 
+    # Web enumeration and testing
+    ffuf
+    gobuster
+    whatweb
+    burpsuite
+    firefox-esr
 
-# Network & SMB
-sudo apt install -y \
-    netcat-openbsd \
-    smbclient \
-    wireshark \
+    # Network and SMB
+    netcat-openbsd
+    smbclient
+    wireshark
+    tshark
+    tcpdump
     responder
 
-echo "==> Setting up Wireshark..."
-sudo usermod -aG wireshark "$USER"
+    # Active Directory
+    impacket-scripts
+    evil-winrm
+    ldap-utils
 
-# Exploitation
-sudo apt install -y \
-    metasploit-framework \
-    exploitdb
+    # Exploitation
+    metasploit-framework
 
-# Hash Cracking
-sudo apt install -y \
+    # Password and hash cracking
     hashcat
 
-# Privilege Escalation
-sudo apt install -y \
+    # Privilege escalation
     peass
 
-echo "==> Verifying Searchsploit..."
-if command -v searchsploit >/dev/null 2>&1; then
-    echo "    Searchsploit is installed."
-else
-    echo "    ERROR: Searchsploit installation failed."
-    exit 1
-fi
-
-echo "==> Updating Searchsploit Database..."
-# Updating Seddarchsploit Database
-searchsploit -u
-
-# Programming & scripting
-sudo apt install -y \
-    python3-pip \
-    python3-venv \
+    # Programming
+    python3-pip
+    python3-venv
+    pipx
     jq
 
-# General CLI utilities
-sudo apt install -y \
-    curl \
-    wget \
-    vim \
-    git \
+    # General CLI utilities
+    curl
+    wget
+    vim
+    git
     fastfetch
+    tmux
+    rlwrap
+)
 
-echo "==> Configuring Zsh..."
+sudo apt-get install -y "${PACKAGES[@]}"
 
-ZSHRC="$HOME/.zshrc"
+# --------------------------------------------------
+# Wireshark group membership
+# --------------------------------------------------
 
-if ! grep -qxF 'fastfetch' "$ZSHRC" 2>/dev/null; then
-    printf '\nfastfetch\n' >> "$ZSHRC"
-    echo "    Added fastfetch to $ZSHRC"
-else
-    echo "    fastfetch is already configured."
+log "Configuring Wireshark group..."
+
+if ! id -nG "$USER" | grep -qw wireshark; then
+    sudo usermod -aG wireshark "$USER"
+    echo "Wireshark group added. Re-login required."
 fi
 
-echo "==> Enabling SSH..."
+# --------------------------------------------------
+# Zsh configuration
+# --------------------------------------------------
+
+log "Configuring Zsh..."
+
+ZSHRC="$HOME/.zshrc"
+touch "$ZSHRC"
+
+if ! grep -qxF 'fastfetch' "$ZSHRC"; then
+    printf '\nfastfetch\n' >> "$ZSHRC"
+fi
+
+# --------------------------------------------------
+# SSH configuration
+# --------------------------------------------------
+
+log "Enabling SSH..."
+
 sudo systemctl enable --now ssh
 
-echo "==> Verifying SSH..."
-if systemctl is-active --quiet ssh; then
-    echo "    SSH service is running."
-else
-    echo "    ERROR: SSH service failed to start."
+if ! systemctl is-active --quiet ssh; then
+    echo "ERROR: SSH service failed." >&2
     exit 1
 fi
 
-echo "==> Kali setup complete!"
+# --------------------------------------------------
+# Tool verification
+# --------------------------------------------------
+
+log "Verifying essential tools..."
+
+TOOLS=(
+    ssh
+    nmap
+    ffuf
+    nxc
+    searchsploit
+    msfconsole
+    hashcat
+    gowitness
+)
+
+for tool in "${TOOLS[@]}"; do
+    if command -v "$tool" >/dev/null 2>&1; then
+        printf "  [OK] %s\n" "$tool"
+    else
+        printf "  [MISSING] %s\n" "$tool"
+        exit 1
+    fi
+done
+
+# --------------------------------------------------
+# Complete
+# --------------------------------------------------
+
+log "Kali setup complete!"
+
+echo "Re-login to apply Wireshark group membership."
+echo "Reboot if the system upgrade updated the kernel."
 
