@@ -78,6 +78,7 @@ PACKAGES=(
     impacket-scripts
     evil-winrm
     ldap-utils
+    bloodhound
 
     # Exploitation
     metasploit-framework
